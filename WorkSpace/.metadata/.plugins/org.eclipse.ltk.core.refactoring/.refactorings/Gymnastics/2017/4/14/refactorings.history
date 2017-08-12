@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename local variable &apos;players&apos; in &apos;geeks.practice.recursion.JosephusProblem.josephus(...)&apos; to &apos;n&apos;&#x0D;&#x0A;- Original project: &apos;Gymnastics&apos;&#x0D;&#x0A;- Original element: &apos;geeks.practice.recursion.JosephusProblem.josephus(int, int).players&apos;&#x0D;&#x0A;- Renamed element: &apos;players&apos;&#x0D;&#x0A;- Update references to refactored element" description="Rename local variable &apos;players&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src&lt;geeks.practice.recursion{JosephusProblem.java[JosephusProblem~josephus~I~I@players!570!580!574!580!I!0!true" name="n" references="true" stamp="1491643453424" version="1.0"/>
-</session>

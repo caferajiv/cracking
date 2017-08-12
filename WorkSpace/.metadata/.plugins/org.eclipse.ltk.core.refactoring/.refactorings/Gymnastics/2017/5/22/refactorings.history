@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename type &apos;geeks.tree.BST2DLL.TreeNode&apos; to &apos;Node&apos;&#x0D;&#x0A;- Original project: &apos;Gymnastics&apos;&#x0D;&#x0A;- Original element: &apos;geeks.tree.BST2DLL.TreeNode&apos;&#x0D;&#x0A;- Renamed element: &apos;geeks.tree.BST2DLL.Node&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;TreeNode&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;geeks.tree{BST2DLL.java[BST2DLL[TreeNode" matchStrategy="1" name="Node" qualified="false" references="true" similarDeclarations="false" stamp="1495984017651" textual="false" version="1.0"/>
-</session>

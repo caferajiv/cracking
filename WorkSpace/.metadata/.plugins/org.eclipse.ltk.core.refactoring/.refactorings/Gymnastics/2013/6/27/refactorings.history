@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename method &apos;test.MonkeysInGarden.rearrnageTreeheightsArray(...)&apos; to &apos;rearrangeTreeheightsArray&apos;&#x0D;&#x0A;- Original project: &apos;Gymnastics&apos;&#x0D;&#x0A;- Original element: &apos;test.MonkeysInGarden.rearrnageTreeheightsArray(...)&apos;&#x0D;&#x0A;- Renamed element: &apos;test.MonkeysInGarden.rearrangeTreeheightsArray(...)&apos;&#x0D;&#x0A;- Update references to refactored element" delegate="false" deprecate="false" description="Rename method &apos;rearrnageTreeheightsArray&apos;" flags="589826" id="org.eclipse.jdt.ui.rename.method" input="/src&lt;test{MonkeysInGarden.java[MonkeysInGarden~rearrnageTreeheightsArray~I~\[I" name="rearrangeTreeheightsArray" references="true" stamp="1372619031734" version="1.0"/>
-</session>

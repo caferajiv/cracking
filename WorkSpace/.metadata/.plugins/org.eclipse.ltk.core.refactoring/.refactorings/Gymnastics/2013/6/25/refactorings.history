@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Extract method &apos;private static void removeWorkedPairsFromSet(List&lt;Employee&gt; empList, Set&lt;Integer&gt; setX, Set&lt;Integer&gt; cloneSetX)&apos; from &apos;test.ForeignTrip.emp_violating()&apos; to &apos;test.ForeignTrip&apos;&#x0D;&#x0A;- Original project: &apos;Gymnastics&apos;&#x0D;&#x0A;- Method name: &apos;removeWorkedPairsFromSet&apos;&#x0D;&#x0A;- Destination type: &apos;test.ForeignTrip&apos;&#x0D;&#x0A;- Declared visibility: &apos;private&apos;" comments="false" description="Extract method &apos;removeWorkedPairsFromSet&apos;" destination="0" exceptions="false" flags="786434" id="org.eclipse.jdt.ui.extract.method" input="/src&lt;test{ForeignTrip.java" name="removeWorkedPairsFromSet" replace="false" selection="1548 222" stamp="1371839442843" version="1.0" visibility="2"/>
-</session>
