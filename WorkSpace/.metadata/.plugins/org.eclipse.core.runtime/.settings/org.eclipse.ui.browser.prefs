@@ -1,0 +1,4 @@
+browser-choice=0
+browsers=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<web-browsers current\="0">\r\n<system/>\r\n<external location\="C\:\\Program Files (x86)\\Internet Explorer\\iexplore.exe" name\="Internet Explorer"/>\r\n<external location\="C\:\\Users\\RAJIV\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe" name\="Chrome"/>\r\n</web-browsers>
+eclipse.preferences.version=1
+internalWebBrowserHistory=http\://localhost\:8080/StrutsWebProject/hello.action|*|http\://localhost\:8080/StrutsWebProject/|*|http\://localhost\:8080/StrutsWebProject/hello.action;jsessionid\=858E8DC5DDBC8EC340C39ABFAC975D74|*|http\://localhost\:8080/StrutsWebProject/index.jsp|*|http\://localhost\:8080/SimpleWebApp/|*|http\://localhost\:8080/SimpleWebApp/First.jsp|*|http\://localhost\:8080/SimpleWebApp/first|*|

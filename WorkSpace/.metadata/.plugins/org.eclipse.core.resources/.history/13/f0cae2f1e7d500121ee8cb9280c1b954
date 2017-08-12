@@ -1,0 +1,48 @@
+package test;
+
+public class SmallestGreatest {
+	
+	public static void main(String[] args) {
+		int number=2345;
+		System.out.println(smallest_number(number));
+	}
+	
+	public static int smallest_number(int number)
+    {
+        final int MAX_INT=1000000000;
+        int[] sumAndCount = getSumAndCount(number);
+        int[] productAndCount = getProductAndCount(number);
+        
+        return 0;
+    }
+
+	private static int[] getProductAndCount(int number) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private static int[] getSumAndCount(int number) {
+		int sum=0;
+		int count=1;
+		int[] sum_count=new int[2];
+		int s1=getSumOfDigits(number);
+		while(s1/10>=1)
+		{
+			s1=getSumOfDigits(s1);
+			count++;
+		}
+		return null;
+	}
+
+	private static int getSumOfDigits(int number) {
+		int sum=0;
+		while(number>0)
+		{
+			sum=sum+(number%10);
+			number=number/10;
+		}
+			
+		return sum;
+	}
+
+}

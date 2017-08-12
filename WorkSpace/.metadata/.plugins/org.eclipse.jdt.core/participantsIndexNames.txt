@@ -1,0 +1,7 @@
+INDEX VERSION 1.126
+I:\WorkSpace\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\3552284160.index
+\SimpleWebApp\src
+I:\WorkSpace\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1180192317.index
+\SimpleWebApp\src
+I:\WorkSpace\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\3354178905.index
+\StrutsWebProject\src

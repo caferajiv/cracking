@@ -1,0 +1,461 @@
+// Copyright (C) 2005-2009 -- Adam J. Conover
+package tgipl.sudoku;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Class to solve a Sudoku board using simple recursive backtracking.
+ * <br><br>
+ * This class is designed to be used in a stand alone application <b>and/or</b> as part of a GUI.
+ * As such, there are also some constructs in here that make the code easier to use in a
+ * thread... and perhaps other fields/methods which might not be necessary if not using the
+ * solver as part of a GUI application.
+ * <br><br>
+ * See the source for the <CODE>main</CODE> method of this class for an example of GUI-less usage.
+ * <br><br>
+ * Note: This is probably not the most efficient means of generating a solution!
+ *       The code's original intent was simply to demonstrate problem solving via
+ *       recursive backtracking.  The code was later modified to accommodate a GUI.
+ * @author Adam J. Conover
+ */
+public class SudokuSolver {
+
+    public static final String APP_VERSION = "0.8.8";
+    // cheap fix if the puzzle is uncooperative. Set to <= 0 for unlimited search.
+    public static final long DEFAULT_ITERATION_LIMIT = 100000;
+    private long iterationLimit = DEFAULT_ITERATION_LIMIT;
+    private int sudokuBoard[][];    // The 2D array for the grid.
+    private final int EDGE_LENGTH;  // Assume the board is square. The number of boxes on an edge.
+    private final int TOTAL_BOXES;  // Total number of boxes. Used enough to justify precomputing the precomputing the value.
+    private final int REGION_EDGE;  // The number of cells in the edge of a region.
+    private final int MAX_VALUE;    // The largest value allowed in a box.
+    private boolean bSolved = false;            // Is the puzzle solved?
+    private boolean bRandomCandidates = false;  // Should the candidate search be randomized?
+    private boolean bRunning;                   // Is the search thread running?
+    private BoxChangeListener listener = null;  // Listener for cell updates... primarilly the GUI.
+    private int iterations = 0;                 // Count of iterations.. used early for bailout if desired.
+
+    /**
+     * Solves the Sudoku puzzle provided by the board array.
+     * This constructor assumes the {@link BoxChangeListener} is <CODE>null</CODE>.
+     * @param board The 2D array of boxes representing the Sudoku Puzzle
+     * @param regionSize The size of the (square) regions.  The board edge size should be a multiple of
+     * the sqrt(region) size; otherwise the behavior is undefined.
+     */
+    public SudokuSolver(int[][] board, int regionSize) {
+        this.sudokuBoard = board;
+        this.EDGE_LENGTH = board[0].length;
+        this.TOTAL_BOXES = EDGE_LENGTH * EDGE_LENGTH;
+        this.REGION_EDGE = regionSize;
+        this.MAX_VALUE = Math.max(EDGE_LENGTH, REGION_EDGE);
+    }
+
+    /**
+     * Solves the Sudoku puzzle provided by the board array.
+     * @param board The 2D array of boxes representing the Sudoku Puzzle
+     * @param regionSize The size of the (square) regions.  The board edge size must be a multiple of
+     * the region size; otherwise the behavior is undefined.
+     * @param listener The Object the will listen for box change events.  Set this to null (or call the
+     * appropriate constructor) if this behavior is not desired.
+     */
+    public SudokuSolver(int[][] board, int regionSize, BoxChangeListener listener) {
+        this(board, regionSize);
+        this.setListener(listener);
+    }
+
+    /**
+     * Creates an empty Sudoku puzzle.  Box values may be set by calling {@link #setBoxValue(int row, int col, int value)}.
+     * @param edgeSize The edge size of the Sudoku board
+     * @param regionSize The size of the (square) regions.  The board edge size must be a multiple of
+     * the region size; otherwise the behavior is undefined.
+     * @param listener The Object the will listen for box change events.  Set this to null (or call the
+     * appropriate constructor) if this behavior is not desired.
+     */
+    public SudokuSolver(int edgeSize, int regionSize, BoxChangeListener listener) {
+        this(new int[edgeSize][edgeSize], regionSize, listener);
+    }
+
+    /**
+     * Creates a random board and clears/fills a specified number of boxes.
+     * @param edgeSize The edge size of the new board
+     * @param regionSize The region size of the new board
+     * @param keyBoxes the number of key boxes on the new board
+     * @param listener The listener for box change updates
+     * @param invert If <CODE>true</CODE> clears a specified number of boxes.  If <CODE>false</CODE> the
+     * specified number of boxes are filled.
+     * @throws com.adamconover.sudokuSolver.SudokuSolver.SolutionTimeExcededException This exception is thrown if the number "iterations" exceeds the assigned threshold.
+     */
+    public SudokuSolver(int edgeSize, int regionSize, int keyBoxes, boolean invert, BoxChangeListener listener)
+            throws SolutionTimeExcededException {
+        this(edgeSize, regionSize, listener);
+
+        this.bRandomCandidates = true;
+        solve();
+        this.bRandomCandidates = false;
+
+        if (!invert) {
+            keyBoxes = edgeSize * edgeSize - keyBoxes;
+        }
+
+        // Clear random boxes for puzzle generation.
+        List<Integer> clearList = new ArrayList<Integer>(keyBoxes);
+        for (int offset = 0; offset < edgeSize * edgeSize; offset++) {
+            clearList.add(offset);
+        }
+        Collections.shuffle(clearList);
+
+        for (int i : clearList.subList(0, keyBoxes)) {
+            int col = i % EDGE_LENGTH;
+            int row = i / EDGE_LENGTH;
+            clear(row, col);
+        }
+    }
+
+    /**
+     * Solve Sudoku board using recursive backtracking.
+     * This is really just a "convenience method" to solve staring with the first box.
+     * Additionally, it maintains a "running" flag for using the solver in a thread.
+     * @throws com.adamconover.sudokuSolver.SudokuSolver.SolutionTimeExcededException This exception will be thrown if a (non zero) iteration limit has been set and
+     * that number of iterations has been exceeded.
+     */
+    public void solve() throws SolutionTimeExcededException {
+        this.iterations = 0;
+        this.bSolved = false;
+
+        this.bRunning = true;
+        solve(0);
+        this.bRunning = false;
+    }
+
+    /**
+     * Solve Sudoku board using recursive backtracking.
+     * Note:  The initial box offset will usually be zero, to solve the whole puzzle.
+     *        The parameter really exists for the recursive call structure.
+     * @param offset Current position to examine
+     * @throws com.adamconover.sudokuSolver.SudokuSolver.SolutionTimeExcededException This exception will be thrown if a (non zero) iteration limit has been set and
+     * that number of iterations has been exceeded.
+     */
+    public void solve(int offset) throws SolutionTimeExcededException {
+        if (iterationLimit > 0 && iterations++ > iterationLimit) {
+            throw new SolutionTimeExcededException();
+        }
+
+        // If the offset is >= the total boxes, we are solved!
+        if (offset >= TOTAL_BOXES) {
+            this.bSolved = true;
+            return;
+        }
+
+        // Convert offset to a row and column.
+        int col = offset % EDGE_LENGTH;
+        int row = offset / EDGE_LENGTH;
+
+        // check to see if it already has a populated value.  If it does, we
+        // know it must be a a key field.
+        if (this.sudokuBoard[row][col] == 0) {
+
+            List<Integer> candidateList = getCandidateList(row, col);
+            if (this.bRandomCandidates) {
+                Collections.shuffle(candidateList);
+            }
+
+            // loop through all candidate digits.
+            for (int candidate : candidateList) {
+                if (!this.bRunning || this.bSolved) {
+                    break;
+                }
+
+                this.sudokuBoard[row][col] = candidate;   // set box to candidate value
+                if (this.listener != null) {
+                    this.listener.boxUpdated(row, col, candidate, offset);
+                }
+                solve(offset + 1);
+            }
+
+            // backtracking.
+            if (!this.bSolved) {
+                this.sudokuBoard[row][col] = 0;
+                if (this.listener != null) {
+                    this.listener.boxUpdated(row, col, 0, offset);
+                }
+            }
+
+        } else {
+            solve(offset + 1);
+        }
+
+    }
+
+    void stop() {
+        this.bRunning = false;
+    }
+
+    /**
+     * Builds a candidate value list for the target box.
+     * @param row The row to generate the candidate list for.
+     * @param col The column to generate the candidate list for.
+     * @return An Integer[ ] of the candidates.
+     */
+    public List<Integer> getCandidateList(int row, int col) {
+        List<Integer> list = new ArrayList<Integer>(MAX_VALUE);
+        for (int candidate = 1; candidate <= MAX_VALUE; candidate++) {
+            if (isCandidate(row, col, candidate)) {
+                list.add(candidate);
+            }
+        }
+        return (list);
+    }
+
+    /**
+     * Checks to see if a number is a candidate for the square.
+     * Calls each rule method.
+     * @param row The row of the box to check
+     * @param col The column of the box to check
+     * @param value The value to check against
+     * @return This method will return <CODE>true</CODE> if all rules are satisfied.
+     */
+    private boolean isCandidate(int row, int col, int value) {
+        if (value <= 0) {
+            return false;
+        } else {
+            return !rule_RowViolation(row, col, value) &&
+                    !rule_ColViolation(row, col, value) &&
+                    !rule_RegionViolation(row, col, value);
+        }
+    }
+
+    /**
+     * RULE: Check to see if a given number already exists in a row <B>or</B> if the
+     *       existing value in a box is valid.  This method can be used either for
+     *       validation of an exiting cell or the validity of a proposed value.
+     * @param row The row to check
+     * @param col The column of the existing cell. This is only used to skip over the cell being checked.
+     * @param value The value to check against.
+     * @return This method will return <CODE>true</CODE> if the rule is <I>violated</I>
+     */
+    private boolean rule_RowViolation(int row, int col, int value) {
+        // Find duplicates is a row
+        for (int j = 0; j < EDGE_LENGTH; j++) {
+            if (j != col && this.sudokuBoard[row][j] == value) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * RULE: Check to see if a given number already exists in a column <B>or</B> if the
+     *       existing value in a box is valid.  This method can be used either for
+     *       validation of an exiting cell or the validity of a proposed value.
+     * @param row The row of the existing cell. This is only used to skip over the cell being checked.
+     * @param col The column to check
+     * @param value The value to check against.
+     * @return This method will return <CODE>true</CODE> if the rule is <I>violated</I>
+     */
+    private boolean rule_ColViolation(int row, int col, int value) {
+        // Find duplicates in a region
+        for (int i = 0; i < EDGE_LENGTH; i++) {
+            if (i != row && this.sudokuBoard[i][col] == value) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * RULE: Check to see if a given number already exists in a cage <B>or</B> if the
+     *       existing value in a box is valid.  This method can be used either for
+     *       validation of an exiting cell or the validity of a proposed value.
+     * @param row The row of the box to check
+     * @param col The column of the box to check
+     * @param value The value to check against.
+     * @return This method will return <CODE>true</CODE> if the rule is <I>violated</I>
+     */
+    private boolean rule_RegionViolation(int row, int col, int value) {
+        // Get row and colum of region cell
+        int rowBase = row - row % REGION_EDGE;
+        int colBase = col - col % REGION_EDGE;
+
+        // Look for duplicates in the region
+        for (int i = rowBase; i < REGION_EDGE + rowBase; i++) {
+            for (int j = colBase; j < REGION_EDGE + colBase; j++) {
+                if (i != row && j != col && this.sudokuBoard[i][j] == value) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Display the formatted board array to stdout.
+     */
+    public void displayBoard() {
+        for (int row = 0; row < EDGE_LENGTH; row++) {
+            for (int col = 0; col < EDGE_LENGTH; col++) {
+                System.out.printf("%4d", this.sudokuBoard[row][col]);
+            }
+            System.out.println();
+        }
+    }
+
+    /**
+     * Determines if the board exists in a valid configuration. (i.e., No rules are broken).
+     * It <B>does not</B> necessarily determine if the puzzle is actually solvable.
+     * @return <CODE>true</CODE> if the board exists in a valid configuration, <CODE>false</CODE> otherwise.
+     */
+    public boolean isValidBoard() {
+        for (int row = 0; row < EDGE_LENGTH; row++) {
+            for (int col = 0; col < EDGE_LENGTH; col++) {
+                int boxValue = this.sudokuBoard[row][col];
+                if (boxValue != 0) {
+                    if (!isCandidate(row, col, boxValue)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Determines the board has been completely solved
+     * @return <CODE>true</CODE> if the board is solved in a valid configuration, <CODE>false</CODE> otherwise.
+     */
+    public boolean isSolvedBoard() {
+        if (isValidBoard()) {
+            for (int row = 0; row < EDGE_LENGTH; row++) {
+                for (int col = 0; col < EDGE_LENGTH; col++) {
+                    if (this.sudokuBoard[row][col] < 1 || getCandidateList(row, col).size() > 1) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Sets the value of a box to the given value.  This is essentially a convenience
+     * method to ensure that only numbers get into boxes.
+     * @param row The row of the box to set
+     * @param col The column of the box to set
+     * @param value The value to set in the box
+     */
+    public void setBoxValue(int row, int col, int value) {
+        assert (row < EDGE_LENGTH) : "Attempt to set a row larger than the grid: " + row;
+        assert (col < EDGE_LENGTH) : "Attempt to set a col larger than the grid: " + col;
+        assert (value <= MAX_VALUE) : "Attempt to set value larger than the max permitted: " + col;
+
+        this.sudokuBoard[row][col] = value;
+    }
+
+    /**
+     * Gets the value of a given box.  This is essentially a convenience method to return
+     * <CODE>int</CODE>s and avoid a <CODE>cast</CODE> elsewhere.
+     * @param row The row of the box value to get
+     * @param col The column of the box value to get
+     * @return The value contained in the specified box
+     */
+    public int getBoxValue(int row, int col) {
+        assert (row < EDGE_LENGTH) : "Attempt to get a row larger than the grid: " + row;
+        assert (col < EDGE_LENGTH) : "Attempt to get a col larger than the grid: " + col;
+
+        return this.sudokuBoard[row][col];
+    }
+
+    /**
+     * Clears the value in a box.  This is essentially a convenience method to set the
+     * box value to 0 (or empty).
+     * @param row The row of the box to set
+     * @param col The column of the box to set
+     */
+    public void clear(int row, int col) {
+        setBoxValue(row, col, 0);
+    }
+
+    /**
+     * Sets the object that will listen for box changed events
+     * @param listener The object the will listen for changes to entry boxes
+     */
+    protected void setListener(BoxChangeListener listener) {
+        this.listener = listener;
+    }
+
+    /**
+     * The maximum number of iterations to be used to find a solution.  This is
+     * most useful when <i>generating</i> random puzzles:  most of the time puzzles are
+     * generated very quickly, but due to the "NP" nature of the
+     * generation algorithm, sometimes a stubborn one is encountered.  The
+     * iteration limit prevents the generation from taking an inordinately
+     * long time.
+     * <br><br>
+     * When solving a puzzle with a known solution, the iteration limit should be set
+     * &lt;= 0 to guarantee the entire search space is covered.
+     * @param limit The maximum number of iteration to be used to find a solution.  Use a value
+     * &lt;= 0 for no upper bound.
+     */
+    public void setIterationLimit(long limit) {
+        // <= 0 is iterpreted as "no limit"
+        iterationLimit = (limit >= 0) ? limit : DEFAULT_ITERATION_LIMIT;
+    }
+
+    
+    /**
+     * The exception have be thrown if the generation/solve time is exceeded.  See
+     * {@link #setIterationLimit(long limit)} for more information.
+     */
+    public class SolutionTimeExcededException extends Exception {
+        private static final long serialVersionUID = -7636107572997286140L;
+
+        /**
+         * This Exception is thrown if the number of iteration exceeds the limit
+         */
+        public SolutionTimeExcededException() {
+            super("No Solution was found within" + SudokuSolver.this.iterationLimit + " iterations!");
+        }
+    }
+
+
+    /**
+     * Unit test
+     * @param args N/A
+     * @throws com.adamconover.sudokuSolver.SudokuSolver.SolutionTimeExcededException This exception will be thrown if a (non zero) iteration limit has been set and that number of iterations has been exceded.
+     */
+    public static void main(String[] args) throws SolutionTimeExcededException {
+        // test puzzle from: http://www.sudoku.com/
+        int board[][] = {
+            {0, 6, 0, 1, 0, 4, 0, 5, 0},
+            {0, 0, 8, 3, 0, 5, 6, 0, 0},
+            {2, 0, 0, 0, 0, 0, 0, 0, 1},
+            {8, 0, 0, 4, 0, 7, 0, 0, 6},
+            {0, 0, 6, 0, 0, 0, 3, 0, 0},
+            {7, 0, 0, 9, 0, 1, 0, 0, 4},
+            {5, 0, 0, 0, 0, 0, 0, 0, 2},
+            {0, 0, 7, 2, 0, 6, 9, 0, 0},
+            {0, 4, 0, 5, 0, 8, 0, 7, 0}};
+
+        SudokuSolver ss = new SudokuSolver(board, 3);
+        System.out.println("BEGINING BOARD ----------------------");
+        ss.displayBoard();
+        System.out.println();
+
+        long startTime = System.currentTimeMillis();
+        ss.solve();
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("ENDING BOARD --------------------------");
+        ss.displayBoard();
+        System.out.println();
+
+        System.out.printf("Completed in %d miliseconds", endTime - startTime);
+    }
+}
+

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Extract method &apos;private void removeTaskFromQueue(FutureWrapper futureWrapper)&apos; from &apos;com.rajiv.loadcontrol.LoadController.cancelTaskOnTimeOut()&apos; to &apos;com.rajiv.loadcontrol.LoadController&apos;&#x0D;&#x0A;- Original project: &apos;OverloadControl_Framework&apos;&#x0D;&#x0A;- Method name: &apos;removeTaskFromQueue&apos;&#x0D;&#x0A;- Destination type: &apos;com.rajiv.loadcontrol.LoadController&apos;&#x0D;&#x0A;- Declared visibility: &apos;private&apos;&#x0D;&#x0A;- Replace occurrences of statements with method" comments="false" description="Extract method &apos;removeTaskFromQueue&apos;" destination="0" exceptions="false" flags="786434" id="org.eclipse.jdt.ui.extract.method" input="/src&lt;com.rajiv.loadcontrol{LoadController.java" name="removeTaskFromQueue" replace="true" selection="4225 391" stamp="1351970915078" version="1.0" visibility="2"/>
+</session>

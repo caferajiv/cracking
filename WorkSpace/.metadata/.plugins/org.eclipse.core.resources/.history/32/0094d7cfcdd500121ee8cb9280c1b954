@@ -1,0 +1,53 @@
+package test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.rc.retroweaver.runtime.Arrays;
+
+public class SortingDisk {
+	
+	public static void main(String[] args) {
+		int[] order = {5,2,1,3,4}; //4,1,0,2,3
+		System.out.println(get_order(order));
+	}
+
+	public static int get_order(int[] order)
+    {
+		transformInputToMatchIndexes(order);
+		
+		List<Integer> dList = new ArrayList<Integer>();
+		List<Integer> backedList = new ArrayList<Integer>(); 
+		for(int a: order)
+		{
+			backedList.add(a);
+		}
+		int [] descendingIndex = getDescendingIndexArray(order);
+        return 0;
+    }
+	
+	private static int[] getDescendingIndexArray(int[] order) {
+	
+		int[] decArray= new int[order.length];
+		for(int i=0;i<order.length;i++)
+		{
+			//order[i]
+		}
+		
+		return null;
+	}
+
+	private static void transformInputToMatchIndexes(int[] order) {
+		//reduce 1 from each number 
+		for(int i=0;i<order.length;i++)
+		{
+			order[i]=order[i]-1;
+		}
+		
+	}
+
+	private static int getIndexOfANumber(int number, int[] order)
+	{
+		return number ;//- order[index]-index;
+	}
+}

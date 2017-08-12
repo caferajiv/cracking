@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Extract method &apos;private static void verifyOnce(String[] ans, Map&lt;Integer,Boolean&gt; map)&apos; from &apos;test.TeamInterview.get_responce()&apos; to &apos;test.TeamInterview&apos;&#x0D;&#x0A;- Original project: &apos;Gymnastics&apos;&#x0D;&#x0A;- Method name: &apos;verifyOnce&apos;&#x0D;&#x0A;- Destination type: &apos;test.TeamInterview&apos;&#x0D;&#x0A;- Declared visibility: &apos;private&apos;" comments="false" description="Extract method &apos;verifyOnce&apos;" destination="0" exceptions="false" flags="786434" id="org.eclipse.jdt.ui.extract.method" input="/src&lt;test{TeamInterview.java" name="verifyOnce" replace="false" selection="519 991" stamp="1372267226562" version="1.0" visibility="2"/>
+</session>

@@ -1,0 +1,15 @@
+package test;
+
+public class SmallestGreatest {
+	
+	public static void main(String[] args) {
+		int number=2345;
+		smallest_number();
+	}
+	
+	public static int smallest_number(int number)
+    {
+        //Write code here
+    }
+
+}

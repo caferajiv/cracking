@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;hacker.ds.stacks.Test&apos; to &apos;StackMin&apos;&#x0D;&#x0A;- Original project: &apos;Gymnastics&apos;&#x0D;&#x0A;- Original element: &apos;hacker.ds.stacks.Test&apos;&#x0D;&#x0A;- Renamed element: &apos;hacker.ds.stacks.StackMin&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;Test&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;hacker.ds.stacks{Test.java[Test" matchStrategy="1" name="StackMin" qualified="false" references="true" similarDeclarations="false" stamp="1491851342409" textual="false" version="1.0"/>
+</session>

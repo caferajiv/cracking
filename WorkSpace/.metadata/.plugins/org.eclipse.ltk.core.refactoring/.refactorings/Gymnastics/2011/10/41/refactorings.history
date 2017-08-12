@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;sahni.NonRecursiveFactorial&apos; to &apos;Factorial&apos;&#x0D;&#x0A;- Original project: &apos;Gymnastics&apos;&#x0D;&#x0A;- Original element: &apos;sahni.NonRecursiveFactorial&apos;&#x0D;&#x0A;- Renamed element: &apos;sahni.Factorial&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;NonRecursiveFactorial&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;sahni{NonRecursiveFactorial.java[NonRecursiveFactorial" matchStrategy="1" name="Factorial" qualified="false" references="true" similarDeclarations="false" stamp="1317987036843" textual="false" version="1.0"/>
+</session>
